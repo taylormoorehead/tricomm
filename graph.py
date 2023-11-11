@@ -29,7 +29,7 @@ with open(os.path.join(os.getcwd(), mp_csv1), 'r') as file:
 
     for row in csv_reader:
         if not row[0] == 'GEOID':
-            marginal_pops_init[row[0]] = [row[1], row[2]]
+            marginal_pops_init[row[0]] = [[row[1]], [row[3], row[27]]]
 
 spatial_csv = 'spatial.csv'
 marginal_pops = {}
@@ -101,8 +101,11 @@ for p in pharmacies:
     demo_pop = 0
 
     for a in adj_mp:
-        total_pop += float(marginal_pops_init.get(a)[0])
-        demo_pop += float(marginal_pops_init.get(a)[1])
+        total_pop += float(marginal_pops_init.get(a)[0][0])
+        i = 1
+
+        for i in range(len(marginal_pops_init.get(a)[1])):
+            demo_pop += float(marginal_pops_init.get(a)[1][i])
 
     if not total_pop == 0:
         csv_lines[p] = [[adj_mp], [float(demo_pop / total_pop)]]
