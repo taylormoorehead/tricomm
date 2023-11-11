@@ -93,6 +93,7 @@ census_summarized <- census_county |>
 county_drug <- read_csv("~/tricomm/TriCoMM-Country-Prescriptions.csv", show_col_types = FALSE) 
 
 census_summarized <- left_join(census_summarized, county_drug, by = "County")
+census_summarized <- mutate(census_summarized, Prescriptions_Per_Population = Prescriptions / Population)
 
 census_summarized
 
