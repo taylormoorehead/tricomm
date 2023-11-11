@@ -21,15 +21,15 @@ with open(os.path.join(os.getcwd(), pharm_csv), 'r') as file:
 
             pharmacies[name] = [x, y]
 
-mp_csv1 = 'table01.csv'
-marginal_pops_init = []
+mp_csv1 = 'table08.csv'
+marginal_pops_init = {}
 
 with open(os.path.join(os.getcwd(), mp_csv1), 'r') as file:
     csv_reader = csv.reader(file)
 
     for row in csv_reader:
         if not row[0] == 'GEOID':
-            marginal_pops_init.append(row[0])
+            marginal_pops_init[row[0]] = [row[1], row[2]]
 
 spatial_csv = 'spatial.csv'
 marginal_pops = {}
@@ -37,7 +37,7 @@ marginal_pops = {}
 with open(os.path.join(os.getcwd(), spatial_csv), 'r') as file:
     csv_reader = csv.reader(file)
 
-    for mp in marginal_pops_init:
+    for mp in marginal_pops_init.keys():
         for row in csv_reader:
             if row[0] == mp:
                 x = row[2]
@@ -85,6 +85,46 @@ for p in pharmacies.keys():
         edges.append((p, minpop, mindist))
 
 B.add_weighted_edges_from(edges)
+
+csv_lines = {}
+
+for p in pharmacies:
+    adj_mp = []
+
+    for e in edges:
+        if p in e:
+            # Determine the other node connected to 'p' in the edge 'e'
+            adj_node = e[0] if e[1] == p else e[1]
+            adj_mp.append(adj_node)
+
+    total_pop = 0
+    demo_pop = 0
+
+    for a in adj_mp:
+        total_pop += float(marginal_pops_init.get(a)[0])
+        demo_pop += float(marginal_pops_init.get(a)[1])
+
+    if not total_pop == 0:
+        csv_lines[p] = [[adj_mp], [float(demo_pop / total_pop)]]
+    else:
+        csv_lines[p] = [[adj_mp], [float(0)]]
+
+output_csv = 'stats08.csv'
+
+with open(output_csv, 'w', newline='') as csv_file:
+    csv_writer = csv.writer(csv_file)
+
+    # Write the headers
+    csv_writer.writerow(['Pharmacy', 'Populations', 'Percent'])
+
+    # Write the rows
+    for pharmacy, values in csv_lines.items():
+        # Unpack values list
+        population, percent = values
+
+        csv_writer.writerow([pharmacy, population, percent])
+
+print("CSV file has been successfully created.")
 
 # Visualize the bipartite graph
 pos = {node: (0, i) for i, node in enumerate(pharmacies)}  # Assign positions for the pharmacies
