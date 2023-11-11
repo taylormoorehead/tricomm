@@ -21,7 +21,7 @@ with open(os.path.join(os.getcwd(), pharm_csv), 'r') as file:
 
             pharmacies[name] = [x, y]
 
-mp_csv1 = 'table08.csv'
+mp_csv1 = 'table11.csv'
 marginal_pops_init = {}
 
 with open(os.path.join(os.getcwd(), mp_csv1), 'r') as file:
@@ -109,7 +109,7 @@ for p in pharmacies:
     else:
         csv_lines[p] = [[adj_mp], [float(0)]]
 
-output_csv = 'stats08.csv'
+output_csv = 'stats11.csv'
 
 with open(output_csv, 'w', newline='') as csv_file:
     csv_writer = csv.writer(csv_file)
@@ -126,20 +126,20 @@ with open(output_csv, 'w', newline='') as csv_file:
 
 print("CSV file has been successfully created.")
 
-# Visualize the bipartite graph
-pos = {node: (0, i) for i, node in enumerate(pharmacies)}  # Assign positions for the pharmacies
-pos.update({node: (1, i) for i, node in enumerate(marginal_pops)})  # Assign positions for marginalized populations
+# # Visualize the bipartite graph
+# pos = {node: (0, i) for i, node in enumerate(pharmacies)}  # Assign positions for the pharmacies
+# pos.update({node: (1, i) for i, node in enumerate(marginal_pops)})  # Assign positions for marginalized populations
 
-plt.figure(figsize=(12, 8))
+# plt.figure(figsize=(12, 8))
 
-# Use a different layout algorithm (e.g., spring_layout)
-pos = nx.spring_layout(B)
+# # Use a different layout algorithm (e.g., spring_layout)
+# pos = nx.spring_layout(B)
 
-# Increase node size and font size
-nx.draw(B, pos, with_labels=True, node_color='skyblue', node_size=50, font_size=8)
+# # Increase node size and font size
+# nx.draw(B, pos, with_labels=True, node_color='skyblue', node_size=50, font_size=8)
 
-# Increase edge visibility
-nx.draw_networkx_edges(B, pos, width=[d['weight'] for (u, v, d) in B.edges(data=True)], edge_color='gray')
+# # Increase edge visibility
+# nx.draw_networkx_edges(B, pos, width=[d['weight'] for (u, v, d) in B.edges(data=True)], edge_color='gray')
 
-# Show the plot
-plt.show()
+# # Show the plot
+# plt.show()
