@@ -15,3 +15,34 @@ library(tidymodels)
 census_data <- read_csv("~/tricomm/table01.csv")
 spec(census_data)
 ```
+
+```{r}
+# Load your pre-existing dataset
+your_dataset <- read.csv("~/tricomm/table01.csv")  # Replace with the actual path
+
+# Define the number of iterations
+num_iterations <- 1000
+
+# Initialize a vector to store the results
+results <- numeric(num_iterations)
+
+# Run the Monte Carlo simulation
+for (i in 1:num_iterations) {
+  # Sample from your pre-existing dataset
+  sample_row <- your_dataset[sample(nrow(your_dataset), 1), ]
+  
+  # Extract variables of interest
+  variable1 <- sample_row$Variable1
+  variable2 <- sample_row$Variable2
+  
+  # Run your simulation or model with the sampled values
+  result <- variable1 * variable2
+  
+  # Store the result
+  results[i] <- result
+}
+
+# Analyze the results
+summary(results)
+hist(results, main = "Monte Carlo Simulation Results", xlab = "Outcome")
+```
