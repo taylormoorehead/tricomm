@@ -89,8 +89,14 @@ census_summarized <- census_county |>
     TotalUninsuredMale = sum(TotalUninsuredMale),
     TotalInsuredFemale = sum(TotalInsuredFemale),
     TotalUninsuredFemale = sum(TotalUninsuredFemale),
-    Population = sum(TotalAgeMale + TotalAgeFemale)
-  )
+    Population = sum(TotalAgeMale + TotalAgeFemale),
+    EmployedPercent = (TotalWorkMale + TotalAgeFemale)/Population,
+    PovertyPercent = (TotalPovertyMale + TotalPovertyFemale)/Population,
+    InsuredPercent = (TotalInsuredMale + TotalInsuredFemale)/Population
+  ) 
+
+census_summarized <- census_summarized |>
+  select(County, -TotalAgeMale, -TotalAgeFemale, -TotalWorkMale, -TotalWorkFemale, -TotalPovertyMale, -TotalPovertyFemale, -TotalInsuredMale, -TotalUninsuredMale, -TotalInsuredFemale, -TotalUninsuredFemale, Population, EmployedPercent, PovertyPercent, InsuredPercent)
 
 county_drug <- read_csv("~/tricomm/TriCoMM-Country-Prescriptions.csv", show_col_types = FALSE) 
 
