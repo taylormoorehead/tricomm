@@ -68,9 +68,23 @@ for m in marginal_pops.keys():
             mindist = distance
             minpharm = p
     
-    edges.append((minpharm, m))
+    edges.append((minpharm, m, mindist))
 
-B.add_edges_from(edges)
+minpop = ''
+
+for p in pharmacies.keys():
+    mindist = float('inf')
+
+    if not edges.__contains__(p):
+        for m in marginal_pops.keys():
+            distance = distformula(float(marginal_pops.get(m)[0]), float(marginal_pops.get(m)[1]), float(pharmacies.get(p)[0]), float(pharmacies.get(p)[1]))
+            if mindist > distance:
+                mindist = distance
+                minpop = m
+    
+        edges.append((p, minpop, mindist))
+
+B.add_weighted_edges_from(edges)
 
 # Visualize the bipartite graph
 pos = {node: (0, i) for i, node in enumerate(pharmacies)}  # Assign positions for the pharmacies
@@ -85,7 +99,7 @@ pos = nx.spring_layout(B)
 nx.draw(B, pos, with_labels=True, node_color='skyblue', node_size=50, font_size=8)
 
 # Increase edge visibility
-nx.draw_networkx_edges(B, pos, width=0.5)
+nx.draw_networkx_edges(B, pos, width=[d['weight'] for (u, v, d) in B.edges(data=True)], edge_color='gray')
 
 # Show the plot
 plt.show()
