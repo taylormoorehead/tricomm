@@ -12,6 +12,8 @@ library(tidymodels)
 library(readr)
 library(dplyr)
 library(ggplot2)
+library(knitr)
+library(patchwork)
 
 ```
 
@@ -56,8 +58,8 @@ census_final <- census_final %>%
   rename(
     TotalAgeMale = B01001_002E,
     TotalAgeFemale = B01001_026E,
-    TotalSexWorkMale = B23022_002E,
-    TotalSexWorkFemale = B23022_026E,
+    TotalWorkMale = B23022_002E,
+    TotalWorkFemale = B23022_026E,
     TotalPovertyMale = B17001_003E,
     TotalPovertyFemale = B17001_017E
     # Add more variable name changes as needed
@@ -79,8 +81,8 @@ census_summarized <- census_county |>
   summarize(
     TotalAgeMale = sum(TotalAgeMale),
     TotalAgeFemale = sum(TotalAgeFemale),
-    TotalSexWorkMale = sum(TotalSexWorkMale),
-    TotalSexWorkFemale = sum(TotalSexWorkFemale),
+    TotalWorkMale = sum(TotalWorkMale),
+    TotalWorkFemale = sum(TotalWorkFemale),
     TotalPovertyMale = sum(TotalPovertyMale),
     TotalPovertyFemale = sum(TotalPovertyFemale),
     TotalInsuredMale = sum(TotalInsuredMale),
@@ -100,50 +102,66 @@ census_summarized
 ```
 
 ```{r}
-cor(census_final$TotalPovertyMale, census_final$TotalUninsuredMale)
+cor(census_final$TotalPovertyFemale, census_final$TotalWorkFemale)
 ```
 
 ```{r}
-ggplot(census_final, aes(x = TotalPovertyMale, y = TotalUninsuredMale)) +
+poverty_plot <- ggplot(census_summarized, aes(x = (TotalPovertyMale + TotalPovertyFemale)/Population, y = Prescriptions_Per_Population)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = " # of men in poverty per GEOID vs. # of men w/ no health insurance", x = "Poverty", y = "Insurance")
+  labs(title = " # of people in poverty per county vs. prescriptions per population", x = "Poverty", y = "Prescriptions per Population")
 
+sexwork_plot <- ggplot(census_summarized, aes(x = (TotalWorkMale + TotalWorkFemale)/ Population, y = Prescriptions_Per_Population)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = " # of people participating in sex per county vs. prescriptions per population", x = "Work", y = "Prescriptions per Population")
+
+insurance_plot <- ggplot(census_summarized, aes(x = (TotalInsuredFemale + TotalInsuredMale)/Population, y = Prescriptions_Per_Population)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = " # of uninsured people per county vs. prescriptions per population", x = "Insured people", y = "Prescriptions per Population")
+
+women_plot <- ggplot(census_summarized, aes(x = (TotalAgeFemale)/Population, y = Prescriptions_Per_Population)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = " # of uninsured people per county vs. prescriptions per population", x = "women", y = "Prescriptions per Population")
+
+men_plot <- ggplot(census_summarized, aes(x = (TotalAgeMale)/Population, y = Prescriptions_Per_Population)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = " # of uninsured people per county vs. prescriptions per population", x = "Men", y = "Prescriptions per Population")
+
+
+arranged_plots <- poverty_plot + sexwork_plot +
+                  insurance_plot +
+                  plot_layout(ncol = 2, byrow = TRUE)
+
+# Print the arranged plots
+arranged_plots
 ```
 
 ```{r}
-# Load your pre-existing dataset
-#your_dataset <- read.csv("~/tricomm/table01.csv")  # Replace with the actual path
+set.seed(2)
 
-# Define the number of iterations
-num_iterations <- 1000
+drug_split <- initial_split(census_summarized, prop = 0.75)
+drug_train <- training(drug_split)
+drug_test <- testing(drug_split)
+```
 
-# Initialize a vector to store the results
-results <- numeric(num_iterations)
+```{r}
+drug_fit <- linear_reg() |>
+  set_engine("lm") |>
+  fit(Prescriptions_Per_Population ~ TotalWorkMale + TotalWorkFemale + TotalPovertyMale + TotalPovertyFemale + TotalInsuredMale + TotalUninsuredMale + TotalInsuredFemale + TotalUninsuredFemale + TotalAgeMale + TotalAgeFemale, data = census_summarized)
 
-# Run the Monte Carlo simulation
-for (i in 1:num_iterations) {
-  # Sample from your pre-existing dataset
-  sample_row <- census_final[sample(nrow(census_final), 1), ]
- 
-  # Extract variables of interest
-  variable1 <- sample_row$TotalAgeMale
-  variable2 <- sample_row$TotalAgeFemale
- 
-  # Check if variables are missing or if they meet specific conditions
-  if (!is.na(variable1) & !is.na(variable2)) {
-    # Run your simulation or model with the sampled values
-    result <- variable1 * variable2
-   
-    # Store the result
-    results[i] <- result
-  } else {
-    # If variables are missing or don't meet conditions, retry the iteration
-    i <- i - 1
-  }
-}
+tidy(drug_fit) |> kable(digits = 7)
+```
 
-# Analyze the results
-summary(results)
-hist(results, main = "Monte Carlo Simulation Results", xlab = "Outcome")
+```{r}
+prescription_sm <- sum(census_summarized$Prescriptions)
+prescription_sm
+pop_sum <- sum(census_summarized$Population)
+pop_sum
+
+1206702/15442014
+
 ```
