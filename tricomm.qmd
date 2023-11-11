@@ -12,5 +12,6 @@ library(tidymodels)
 ```
 
 ```{r}
-census_data <- read_csv("~/tricomm/data/table01.csv")
+census_data <- read_csv("~/tricomm/table01.csv")
+spec(census_data)
 ```
