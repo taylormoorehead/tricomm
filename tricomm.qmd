@@ -149,9 +149,11 @@ drug_test <- testing(drug_split)
 ```
 
 ```{r}
+
+
 drug_fit <- linear_reg() |>
-  set_engine("lm") |>
-  fit(Prescriptions_Per_Population ~ TotalWorkMale + TotalWorkFemale + TotalPovertyMale + TotalPovertyFemale + TotalInsuredMale + TotalUninsuredMale + TotalInsuredFemale + TotalUninsuredFemale + TotalAgeMale + TotalAgeFemale, data = census_summarized)
+  set_engine("glm") |>
+  fit(Prescriptions_Per_Population ~ TotalWorkMale + TotalWorkFemale + TotalPovertyMale + TotalPovertyFemale + TotalInsuredMale + TotalUninsuredMale + TotalInsuredFemale + TotalUninsuredFemale + TotalAgeMale + TotalAgeFemale, data = census_summarized, family = "binomial")
 
 tidy(drug_fit) |> kable(digits = 7)
 ```
@@ -164,4 +166,8 @@ pop_sum
 
 1206702/15442014
 
+```
+
+```{r}
+write.csv(census_summarized, file = "census_summarized.csv", row.names = FALSE)
 ```
