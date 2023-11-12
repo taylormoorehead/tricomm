@@ -87,68 +87,69 @@ with open(os.path.join(os.getcwd(), mp_csv1), 'r') as file:
 # B.add_nodes_from(marginal_pops.keys(), bipartite=1)  # marginalized populations are in partition 1
 
 # # Add edges between the two sets
-# edges = []
-# mindist = float('inf')
-# minpharm = ''
+edges = []
+mindist = float('inf')
+minpharm = ''
 
-# def distformula(x1, y1, x2, y2):
-#     distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-#     return distance
+def distformula(x1, y1, x2, y2):
+    distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    return distance
 
-# for m in marginal_pops.keys():
-#     mindist = float('inf')
+for m in marginal_pops.keys():
+    mindist = float('inf')
 
-#     for p in pharmacies.keys():
-#         distance = distformula(float(marginal_pops.get(m)[0]), float(marginal_pops.get(m)[1]), float(pharmacies.get(p)[0]), float(pharmacies.get(p)[1]))
-#         if mindist > distance:
-#             mindist = distance
-#             minpharm = p
+    for p in pharmacies.keys():
+        distance = distformula(float(marginal_pops.get(m)[0]), float(marginal_pops.get(m)[1]), float(pharmacies.get(p)[0]), float(pharmacies.get(p)[1]))
+        if mindist > distance:
+            mindist = distance
+            minpharm = p
     
-#     edges.append((minpharm, m, mindist))
+    edges.append((minpharm, m, mindist))
 
-# minpop = ''
+minpop = ''
 
-# for p in pharmacies.keys():
-#     mindist = float('inf')
+for p in pharmacies.keys():
+    mindist = float('inf')
 
-#     if not edges.__contains__(p):
-#         for m in marginal_pops.keys():
-#             distance = distformula(float(marginal_pops.get(m)[0]), float(marginal_pops.get(m)[1]), float(pharmacies.get(p)[0]), float(pharmacies.get(p)[1]))
-#             if mindist > distance:
-#                 mindist = distance
-#                 minpop = m
+    if not edges.__contains__(p):
+        for m in marginal_pops.keys():
+            distance = distformula(float(marginal_pops.get(m)[0]), float(marginal_pops.get(m)[1]), float(pharmacies.get(p)[0]), float(pharmacies.get(p)[1]))
+            if mindist > distance:
+                mindist = distance
+                minpop = m
     
-#         edges.append((p, minpop, mindist))
+        edges.append((p, minpop, mindist))
 
-# B.add_weighted_edges_from(edges)
+B.add_weighted_edges_from(edges)
 
-# csv_lines = {}
+csv_lines = {}
 
-# for p in pharmacies:
-#     adj_mp = []
+for p in pharmacies:
+    county_add = False
+    adj_mp = []
 
-#     for e in edges:
-#         if p in e:
-#             # Determine the other node connected to 'p' in the edge 'e'
-#             adj_node = e[0] if e[1] == p else e[1]
-#             adj_mp.append(adj_node)
+    for e in edges:
+        if p in e:
+            # Determine the other node connected to 'p' in the edge 'e'
+            adj_node = e[0] if e[1] == p else e[1]
+            adj_mp.append(adj_node)
 
-#     total_pop = 0
-#     demo_pop = 0
+    total_pop = 0
+    demo_pop = 0
 
-#     for a in adj_mp:
-#         total_pop += float(marginal_pops_init.get(a)[0][0])
-#         i = 1
+    for a in adj_mp:
+        total_pop += float(marginal_pops_init.get(a)[0][0])
+        i = 1
 
-#         for i in range(len(marginal_pops_init.get(a)[1])):
-#             demo_pop += float(marginal_pops_init.get(a)[1][i])
+        for i in range(len(marginal_pops_init.get(a)[1])):
+            demo_pop += float(marginal_pops_init.get(a)[1][i])
 
-#     if not total_pop == 0:
-#         csv_lines[p] = [[adj_mp], [float(demo_pop / total_pop)]]
-#     else:
-#         csv_lines[p] = [[adj_mp], [float(0)]]
+    if not total_pop == 0:
+        csv_lines[p] = [[adj_mp], [float(demo_pop / total_pop)]]
+    else:
+        csv_lines[p] = [[adj_mp], [float(0)]]
 
-output_csv = 'stats-all.csv'
+output_csv = 'stats-all2.csv'
 
 with open(output_csv, 'w', newline='') as csv_file:
     csv_writer = csv.writer(csv_file)
