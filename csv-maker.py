@@ -120,7 +120,41 @@ with open(output_csv, 'w', newline='') as csv_file:
         a, b = vals
         if float(county_val.get(c)[1]) > 0.0:
             csv_writer.writerow([f'{c}', f'{float(a) / float(b)}'])
-            print(f'{c}: {float(county_val.get(c)[0]) / float(county_val.get(c)[1])}')
+            # print(f'{c}: {float(county_val.get(c)[0]) / float(county_val.get(c)[1])}')
         else:
             csv_writer.writerow([f'{c}', f'{zero}'])
-            print(f'{c}: 0')
+            # print(f'{c}: 0')
+
+avgs = 0.0
+
+csv_read = 'county-avgs.csv'
+with open(os.path.join(os.getcwd(), csv_read), 'r') as file:
+    csv_reader = csv.reader(file)
+
+    for row in csv_reader:
+        if not row[0] == 'COUNTY':
+            avgs += float(row[1])
+
+avgs /= float(97)
+print(f'{avgs}')
+
+for c, vals in sorted_vals.items():
+    a, b = vals
+    if float(b) != 0 and float(a) / float(b) >= avgs:
+        sorted_vals.get(c).append((float(a) / float(b)) / avgs)
+    elif float(b) != 0 and float(a) / float(b) < avgs:
+        sorted_vals.get(c).append((float(a) / float(b)) / avgs)
+    else:
+        sorted_vals.get(c).append(0.0)
+
+print(f'{sorted_vals}')
+
+output_csv = 'multiples.csv'
+
+with open(output_csv, 'w', newline='') as csv_file:
+    csv_writer = csv.writer(csv_file)
+
+    csv_writer.writerow(['COUNTY', 'MULTIPLE'])
+    for c, vals in sorted_vals.items():
+        a, b, d = vals
+        csv_writer.writerow([f'{c}', f'{d}'])
