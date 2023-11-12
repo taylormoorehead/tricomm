@@ -110,11 +110,13 @@ with open(os.path.join(os.getcwd(), csv_read), 'r') as file:
 output_csv = 'county-avgs.csv'
 zero = 0.0
 
+sorted_vals = dict(sorted(county_val.items(), key=lambda item: item[1][0] / item[1][1] if item[1][1] != 0 else 0, reverse=True))
+
 with open(output_csv, 'w', newline='') as csv_file:
     csv_writer = csv.writer(csv_file)
 
     csv_writer.writerow(['COUNTY', 'AVERAGE'])
-    for c, vals in county_val.items():
+    for c, vals in sorted_vals.items():
         a, b = vals
         if float(county_val.get(c)[1]) > 0.0:
             csv_writer.writerow([f'{c}', f'{float(a) / float(b)}'])
