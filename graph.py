@@ -7,86 +7,86 @@ import math
 # Create a bipartite graph
 B = nx.Graph()
 
-# pharm_csv = 'NC_Pharmacies_MCM.xlsx - Feuil1.csv'
-# pharmacies = {}
+pharm_csv = 'NC_Pharmacies_MCM.xlsx - Feuil1.csv'
+pharmacies = {}
 
-# with open(os.path.join(os.getcwd(), pharm_csv), 'r') as file:
-#     csv_reader = csv.reader(file)
+with open(os.path.join(os.getcwd(), pharm_csv), 'r') as file:
+    csv_reader = csv.reader(file)
 
-#     for row in csv_reader:
-#         if not row[0] == 'NAME':
-#             name = row[0]
-#             x = row[8]
-#             y = row[9]
+    for row in csv_reader:
+        if not row[0] == 'NAME':
+            name = row[0]
+            x = row[8]
+            y = row[9]
 
-#             pharmacies[name] = [x, y]
+            pharmacies[name] = [x, y]
 
 csv_lines = {}
-mp_csv1 = 'stats03.csv'
-
-with open(os.path.join(os.getcwd(), mp_csv1), 'r') as file:
-    csv_reader = csv.reader(file)
-
-    for row in csv_reader:
-        if not row[0] == 'Pharmacy':
-            csv_lines[row[0]] = [row[1], row[2]]
-
-mp_csv1 = 'stats04.csv'
-
-with open(os.path.join(os.getcwd(), mp_csv1), 'r') as file:
-    csv_reader = csv.reader(file)
-
-    for row in csv_reader:
-        if not row[0] == 'Pharmacy':
-            csv_lines[row[0]].append(row[2])
-
-mp_csv1 = 'stats08.csv'
-
-with open(os.path.join(os.getcwd(), mp_csv1), 'r') as file:
-    csv_reader = csv.reader(file)
-
-    for row in csv_reader:
-        if not row[0] == 'Pharmacy':
-            csv_lines[row[0]].append(row[2])
-
-mp_csv1 = 'stats11.csv'
-
-with open(os.path.join(os.getcwd(), mp_csv1), 'r') as file:
-    csv_reader = csv.reader(file)
-
-    for row in csv_reader:
-        if not row[0] == 'Pharmacy':
-            csv_lines[row[0]].append(row[2])
-
-# marginal_pops_init = {}
+mp_csv1 = 'table11.csv'
 
 # with open(os.path.join(os.getcwd(), mp_csv1), 'r') as file:
 #     csv_reader = csv.reader(file)
 
 #     for row in csv_reader:
-#         if not row[0] == 'GEOID':
-#             marginal_pops_init[row[0]] = [[row[1]], [row[3], row[27]]]
+#         if not row[0] == 'Pharmacy':
+#             csv_lines[row[0]] = [row[1], row[2]]
 
-# spatial_csv = 'spatial.csv'
-# marginal_pops = {}
+# mp_csv1 = 'stats04.csv'
 
-# with open(os.path.join(os.getcwd(), spatial_csv), 'r') as file:
+# with open(os.path.join(os.getcwd(), mp_csv1), 'r') as file:
 #     csv_reader = csv.reader(file)
 
-#     for mp in marginal_pops_init.keys():
-#         for row in csv_reader:
-#             if row[0] == mp:
-#                 x = row[2]
-#                 y = row[1]
+#     for row in csv_reader:
+#         if not row[0] == 'Pharmacy':
+#             csv_lines[row[0]].append(row[2])
 
-#                 marginal_pops[mp] = [x, y]
-#                 break
+# mp_csv1 = 'stats08.csv'
 
-# # Add nodes to the graph, specifying the 'bipartite' attribute
-# B.add_nodes_from(pharmacies.keys(), bipartite=0)  # pharmacies are in partition 0
-# B.add_nodes_from(marginal_pops.keys(), bipartite=1)  # marginalized populations are in partition 1
+# with open(os.path.join(os.getcwd(), mp_csv1), 'r') as file:
+#     csv_reader = csv.reader(file)
 
-# # Add edges between the two sets
+#     for row in csv_reader:
+#         if not row[0] == 'Pharmacy':
+#             csv_lines[row[0]].append(row[2])
+
+# mp_csv1 = 'stats11.csv'
+
+# with open(os.path.join(os.getcwd(), mp_csv1), 'r') as file:
+#     csv_reader = csv.reader(file)
+
+#     for row in csv_reader:
+#         if not row[0] == 'Pharmacy':
+#             csv_lines[row[0]].append(row[2])
+
+marginal_pops_init = {}
+
+with open(os.path.join(os.getcwd(), mp_csv1), 'r') as file:
+    csv_reader = csv.reader(file)
+
+    for row in csv_reader:
+        if not row[0] == 'GEOID':
+            marginal_pops_init[row[0]] = [[row[1]], [row[3], row[27]]]
+
+spatial_csv = 'spatial.csv'
+marginal_pops = {}
+
+with open(os.path.join(os.getcwd(), spatial_csv), 'r') as file:
+    csv_reader = csv.reader(file)
+
+    for mp in marginal_pops_init.keys():
+        for row in csv_reader:
+            if row[0] == mp:
+                x = row[2]
+                y = row[1]
+
+                marginal_pops[mp] = [x, y]
+                break
+
+# Add nodes to the graph, specifying the 'bipartite' attribute
+B.add_nodes_from(pharmacies.keys(), bipartite=0)  # pharmacies are in partition 0
+B.add_nodes_from(marginal_pops.keys(), bipartite=1)  # marginalized populations are in partition 1
+
+# Add edges between the two sets
 edges = []
 mindist = float('inf')
 minpharm = ''
@@ -122,64 +122,64 @@ for p in pharmacies.keys():
 
 B.add_weighted_edges_from(edges)
 
-csv_lines = {}
+# csv_lines = {}
 
-for p in pharmacies:
-    county_add = False
-    adj_mp = []
+# for p in pharmacies:
+#     county_add = False
+#     adj_mp = []
 
-    for e in edges:
-        if p in e:
-            # Determine the other node connected to 'p' in the edge 'e'
-            adj_node = e[0] if e[1] == p else e[1]
-            adj_mp.append(adj_node)
+#     for e in edges:
+#         if p in e:
+#             # Determine the other node connected to 'p' in the edge 'e'
+#             adj_node = e[0] if e[1] == p else e[1]
+#             adj_mp.append(adj_node)
 
-    total_pop = 0
-    demo_pop = 0
+#     total_pop = 0
+#     demo_pop = 0
 
-    for a in adj_mp:
-        total_pop += float(marginal_pops_init.get(a)[0][0])
-        i = 1
+#     for a in adj_mp:
+#         total_pop += float(marginal_pops_init.get(a)[0][0])
+#         i = 1
 
-        for i in range(len(marginal_pops_init.get(a)[1])):
-            demo_pop += float(marginal_pops_init.get(a)[1][i])
+#         for i in range(len(marginal_pops_init.get(a)[1])):
+#             demo_pop += float(marginal_pops_init.get(a)[1][i])
 
-    if not total_pop == 0:
-        csv_lines[p] = [[adj_mp], [float(demo_pop / total_pop)]]
-    else:
-        csv_lines[p] = [[adj_mp], [float(0)]]
+#     if not total_pop == 0:
+#         csv_lines[p] = [[adj_mp], [float(demo_pop / total_pop)]]
+#     else:
+#         csv_lines[p] = [[adj_mp], [float(0)]]
 
-output_csv = 'stats-all2.csv'
+# output_csv = 'stats-all2.csv'
 
-with open(output_csv, 'w', newline='') as csv_file:
-    csv_writer = csv.writer(csv_file)
+# with open(output_csv, 'w', newline='') as csv_file:
+#     csv_writer = csv.writer(csv_file)
 
-    # Write the headers
-    csv_writer.writerow(['Pharmacy', 'Populations', 'Disability', 'Insurance', 'Poverty', 'Work'])
+#     # Write the headers
+#     csv_writer.writerow(['Pharmacy', 'Populations', 'Disability', 'Insurance', 'Poverty', 'Work'])
 
-    # Write the rows
-    for pharmacy, values in csv_lines.items():
-        # Unpack values list
-        population, disability, insurance, poverty, work = values
+#     # Write the rows
+#     for pharmacy, values in csv_lines.items():
+#         # Unpack values list
+#         population, disability, insurance, poverty, work = values
 
-        csv_writer.writerow([pharmacy, population, disability, insurance, poverty, work])
+#         csv_writer.writerow([pharmacy, population, disability, insurance, poverty, work])
 
-print("CSV file has been successfully created.")
+# print("CSV file has been successfully created.")
 
-# # Visualize the bipartite graph
-# pos = {node: (0, i) for i, node in enumerate(pharmacies)}  # Assign positions for the pharmacies
-# pos.update({node: (1, i) for i, node in enumerate(marginal_pops)})  # Assign positions for marginalized populations
+# Visualize the bipartite graph
+pos = {node: (0, i) for i, node in enumerate(pharmacies)}  # Assign positions for the pharmacies
+pos.update({node: (1, i) for i, node in enumerate(marginal_pops)})  # Assign positions for marginalized populations
 
-# plt.figure(figsize=(12, 8))
+plt.figure(figsize=(12, 8))
 
-# # Use a different layout algorithm (e.g., spring_layout)
-# pos = nx.spring_layout(B)
+# Use a different layout algorithm (e.g., spring_layout)
+pos = nx.spring_layout(B)
 
-# # Increase node size and font size
-# nx.draw(B, pos, with_labels=True, node_color='skyblue', node_size=50, font_size=8)
+# Increase node size and font size
+nx.draw(B, pos, with_labels=True, node_color='skyblue', node_size=50, font_size=8)
 
-# # Increase edge visibility
-# nx.draw_networkx_edges(B, pos, width=[d['weight'] for (u, v, d) in B.edges(data=True)], edge_color='gray')
+# Increase edge visibility
+nx.draw_networkx_edges(B, pos, width=[d['weight'] for (u, v, d) in B.edges(data=True)], edge_color='gray')
 
-# # Show the plot
-# plt.show()
+# Show the plot
+plt.show()
