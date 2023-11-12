@@ -86,75 +86,105 @@ import ast  # Import the ast module for safely evaluating the string representat
 #             csv_writer.writerow([pharmacy, populations_list, insurance, poverty, work, average, county, target, result])
 
 
-csv_read = 'stats-all2.csv'
-county_val = {}
+# csv_read = 'stats-all2.csv'
+# county_val = {}
 
-with open(os.path.join(os.getcwd(), csv_read), 'r') as file:
-    csv_reader = csv.reader(file)
+# with open(os.path.join(os.getcwd(), csv_read), 'r') as file:
+#     csv_reader = csv.reader(file)
 
-    for row in csv_reader:
-        if not row[0] == 'Pharmacy' and not county_val.keys().__contains__(row[6]):
-            county_val[row[6]] = []
-            county_val.get(row[6]).append(0.0)
-            county_val.get(row[6]).append(0.0)
+#     for row in csv_reader:
+#         if not row[0] == 'Pharmacy' and not county_val.keys().__contains__(row[6]):
+#             county_val[row[6]] = []
+#             county_val.get(row[6]).append(0.0)
+#             county_val.get(row[6]).append(0.0)
 
-with open(os.path.join(os.getcwd(), csv_read), 'r') as file:
-    csv_reader = csv.reader(file)
+# with open(os.path.join(os.getcwd(), csv_read), 'r') as file:
+#     csv_reader = csv.reader(file)
 
-    for row in csv_reader:
-        for c in county_val.keys():
-            if not row[0] == 'Pharmacy' and row[5] > row[7] and row[6].__contains__(c):
-                county_val[c][0] += (float(row[5]) - float(row[7]))
-                county_val[c][1] += 1
+#     for row in csv_reader:
+#         for c in county_val.keys():
+#             if not row[0] == 'Pharmacy' and row[5] > row[7] and row[6].__contains__(c):
+#                 county_val[c][0] += (float(row[5]) - float(row[7]))
+#                 county_val[c][1] += 1
 
-output_csv = 'county-avgs.csv'
-zero = 0.0
+# output_csv = 'county-avgs.csv'
+# zero = 0.0
 
-sorted_vals = dict(sorted(county_val.items(), key=lambda item: item[1][0] / item[1][1] if item[1][1] != 0 else 0, reverse=True))
+# sorted_vals = dict(sorted(county_val.items(), key=lambda item: item[1][0] / item[1][1] if item[1][1] != 0 else 0, reverse=True))
 
-with open(output_csv, 'w', newline='') as csv_file:
-    csv_writer = csv.writer(csv_file)
+# with open(output_csv, 'w', newline='') as csv_file:
+#     csv_writer = csv.writer(csv_file)
 
-    csv_writer.writerow(['COUNTY', 'AVERAGE'])
-    for c, vals in sorted_vals.items():
-        a, b = vals
-        if float(county_val.get(c)[1]) > 0.0:
-            csv_writer.writerow([f'{c}', f'{float(a) / float(b)}'])
-            # print(f'{c}: {float(county_val.get(c)[0]) / float(county_val.get(c)[1])}')
-        else:
-            csv_writer.writerow([f'{c}', f'{zero}'])
-            # print(f'{c}: 0')
+#     csv_writer.writerow(['COUNTY', 'AVERAGE'])
+#     for c, vals in sorted_vals.items():
+#         a, b = vals
+#         if float(county_val.get(c)[1]) > 0.0:
+#             csv_writer.writerow([f'{c}', f'{float(a) / float(b)}'])
+#             # print(f'{c}: {float(county_val.get(c)[0]) / float(county_val.get(c)[1])}')
+#         else:
+#             csv_writer.writerow([f'{c}', f'{zero}'])
+#             # print(f'{c}: 0')
 
-avgs = 0.0
+# avgs = 0.0
+
+# csv_read = 'county-avgs.csv'
+# with open(os.path.join(os.getcwd(), csv_read), 'r') as file:
+#     csv_reader = csv.reader(file)
+
+#     for row in csv_reader:
+#         if not row[0] == 'COUNTY':
+#             avgs += float(row[1])
+
+# avgs /= float(97)
+# print(f'{avgs}')
+
+# for c, vals in sorted_vals.items():
+#     a, b = vals
+#     if float(b) != 0 and float(a) / float(b) >= avgs:
+#         sorted_vals.get(c).append((float(a) / float(b)) / avgs)
+#     elif float(b) != 0 and float(a) / float(b) < avgs:
+#         sorted_vals.get(c).append((float(a) / float(b)) / avgs)
+#     else:
+#         sorted_vals.get(c).append(0.0)
+
+# print(f'{sorted_vals}')
+
+# output_csv = 'multiples.csv'
+
+# with open(output_csv, 'w', newline='') as csv_file:
+#     csv_writer = csv.writer(csv_file)
+
+#     csv_writer.writerow(['COUNTY', 'MULTIPLE'])
+#     for c, vals in sorted_vals.items():
+#         a, b, d = vals
+#         csv_writer.writerow([f'{c}', f'{d}'])
 
 csv_read = 'county-avgs.csv'
+pops = {}
+
 with open(os.path.join(os.getcwd(), csv_read), 'r') as file:
     csv_reader = csv.reader(file)
 
     for row in csv_reader:
         if not row[0] == 'COUNTY':
-            avgs += float(row[1])
+            pops[row[0]] = [float(row[1])]
 
-avgs /= float(97)
-print(f'{avgs}')
+csv_read = 'census_summarized.csv'
+with open(os.path.join(os.getcwd(), csv_read), 'r') as file:
+    csv_reader = csv.reader(file)
 
-for c, vals in sorted_vals.items():
+    for row in csv_reader:
+        if not row[0].__contains__('County'):
+            for p in pops.keys():
+                if row[0].__contains__(p):
+                    pops.get(p).append(float(row[1]))
+
+# print(f'{pops}')
+
+sumfloat = 0.0
+
+for p, vals in pops.items():
     a, b = vals
-    if float(b) != 0 and float(a) / float(b) >= avgs:
-        sorted_vals.get(c).append((float(a) / float(b)) / avgs)
-    elif float(b) != 0 and float(a) / float(b) < avgs:
-        sorted_vals.get(c).append((float(a) / float(b)) / avgs)
-    else:
-        sorted_vals.get(c).append(0.0)
+    sumfloat += (float(a) * float(b))
 
-print(f'{sorted_vals}')
-
-output_csv = 'multiples.csv'
-
-with open(output_csv, 'w', newline='') as csv_file:
-    csv_writer = csv.writer(csv_file)
-
-    csv_writer.writerow(['COUNTY', 'MULTIPLE'])
-    for c, vals in sorted_vals.items():
-        a, b, d = vals
-        csv_writer.writerow([f'{c}', f'{d}'])
+print(f'{int(sumfloat)}')
