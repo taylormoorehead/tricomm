@@ -28,3 +28,11 @@ precision = precision_score(y_test, y_pred)
 
 print(f"Accuracy: {accuracy:.8f}")
 print(f"Precision: {precision:.8f}")
+
+# Assuming y_pred is the array of predictions and "false" is represented by 0
+num_predictions_as_false = sum(y_pred == False)
+total_predictions = len(y_pred)
+
+proportion_as_false = num_predictions_as_false / total_predictions
+
+print(f"Proportion of Predictions as 'False': {proportion_as_false:.8f}")

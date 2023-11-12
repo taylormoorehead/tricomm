@@ -14,9 +14,9 @@ with open(os.path.join(os.getcwd(), csv_read), 'r') as file:
             # Use ast.literal_eval to safely convert the string representation of a list to an actual list
             populations_list = ast.literal_eval(row[1])
 
-            average = (ast.literal_eval(row[2])[0] + ast.literal_eval(row[3])[0] + ast.literal_eval(row[4])[0]) / 3
+            average = (ast.literal_eval(row[2])[0] + (1 - ast.literal_eval(row[3])[0]) + ast.literal_eval(row[4])[0]) / 3
 
-            csv_lines[row[0]] = [populations_list, ast.literal_eval(row[2])[0], ast.literal_eval(row[3])[0], ast.literal_eval(row[4])[0], average]
+            csv_lines[row[0]] = [populations_list, ast.literal_eval(row[2])[0], 1 - ast.literal_eval(row[3])[0], ast.literal_eval(row[4])[0], average]
 
 csv_read = 'counties.csv'
 countiesdict = {}
@@ -46,7 +46,7 @@ with open(os.path.join(os.getcwd(), csv_read), 'r') as file:
         if not row[0].__contains__('County'):
             for c, values_set in csv_lines.items():
                 if row[0].__contains__(values_set[5]):
-                    csv_lines[c].append((float(row[2]) + float(row[3]) + float(row[4])) / 3)
+                    csv_lines[c].append(((1 - float(row[2])) + float(row[3]) + (1 - float(row[4]))) / 3)
 
 # Rest of the code remains unchanged
 output_csv = 'stats-all2.csv'
@@ -68,10 +68,10 @@ with open(os.path.join(os.getcwd(), csv_read), 'r') as file:
 
     for row in csv_reader:
         if not row[0] == 'Pharmacy':
-            if float(row[5]) / float(row[7]) >= 0.6:
-                csv_lines[row[0]].append(True)
-            else:
+            if float(row[5]) > float(row[7]):
                 csv_lines[row[0]].append(False)
+            else:
+                csv_lines[row[0]].append(True)
 
 output_csv = 'stats-all2.csv'
 
