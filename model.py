@@ -3,6 +3,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import GradientBoostingClassifier
 import pandas as pd
 import statsmodels.api as sm
+from sklearn.metrics import roc_auc_score
 
 df = pd.read_csv('stats-all2.csv')
 
@@ -29,10 +30,6 @@ precision = precision_score(y_test, y_pred)
 print(f"Accuracy: {accuracy:.8f}")
 print(f"Precision: {precision:.8f}")
 
-# Assuming y_pred is the array of predictions and "false" is represented by 0
-num_predictions_as_false = sum(y_pred == False)
-total_predictions = len(y_pred)
-
-proportion_as_false = num_predictions_as_false / total_predictions
-
-print(f"Proportion of Predictions as 'False': {proportion_as_false:.8f}")
+y_pred_prob = gbm.predict_proba(X_test)[:, 1]
+auc_roc = roc_auc_score(y_test, y_pred_prob)
+print(f"AUC-ROC Score: {auc_roc:.8f}")
