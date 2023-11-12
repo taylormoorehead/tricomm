@@ -14,6 +14,7 @@ library(dplyr)
 library(ggplot2)
 library(knitr)
 library(patchwork)
+library(broom)
 
 ```
 
@@ -109,33 +110,28 @@ census_summarized
 
 ```{r}
 cor(census_final$TotalPovertyFemale, census_final$TotalWorkFemale)
+cor(census_summarized$Prescriptions_Per_Population, census_summarized$PovertyPercent)
+cor(census_summarized$Prescriptions_Per_Population, census_summarized$EmployedPercent)
+cor(census_summarized$Prescriptions_Per_Population, census_summarized$InsuredPercent)
 ```
 
 ```{r}
-poverty_plot <- ggplot(census_summarized, aes(x = (TotalPovertyMale + TotalPovertyFemale)/Population, y = Prescriptions_Per_Population)) +
+poverty_plot <- ggplot(census_summarized, aes(x = PovertyPercent, y = Prescriptions_Per_Population)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = " # of people in poverty per county vs. prescriptions per population", x = "Poverty", y = "Prescriptions per Population")
+  labs(title = " # of People Below the Poverty \n Line vs. prescriptions per \n population", x = "# of People in Poverty relative \n to Population ", y = "Prescriptions per Population") 
 
-sexwork_plot <- ggplot(census_summarized, aes(x = (TotalWorkMale + TotalWorkFemale)/ Population, y = Prescriptions_Per_Population)) +
+sexwork_plot <- ggplot(census_summarized, aes(x = EmployedPercent, y = Prescriptions_Per_Population)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = " # of people participating in sex per county vs. prescriptions per population", x = "Work", y = "Prescriptions per Population")
+  labs(title = " # of Employed Individuals vs. \n Prescriptions per Population", x = "# of People Employed relative to Population", y = "Prescriptions per Population")
 
-insurance_plot <- ggplot(census_summarized, aes(x = (TotalInsuredFemale + TotalInsuredMale)/Population, y = Prescriptions_Per_Population)) +
+insurance_plot <- ggplot(census_summarized, aes(x = InsuredPercent, y = Prescriptions_Per_Population)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = " # of uninsured people per county vs. prescriptions per population", x = "Insured people", y = "Prescriptions per Population")
+  labs(title = " # of Insured People vs. \n Prescriptions per Population", x = "# of People with Health Insurance realtive \n to Population", y = "Prescriptions per Population")
 
-women_plot <- ggplot(census_summarized, aes(x = (TotalAgeFemale)/Population, y = Prescriptions_Per_Population)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = " # of uninsured people per county vs. prescriptions per population", x = "women", y = "Prescriptions per Population")
 
-men_plot <- ggplot(census_summarized, aes(x = (TotalAgeMale)/Population, y = Prescriptions_Per_Population)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = " # of uninsured people per county vs. prescriptions per population", x = "Men", y = "Prescriptions per Population")
 
 
 arranged_plots <- poverty_plot + sexwork_plot +
@@ -147,11 +143,7 @@ arranged_plots
 ```
 
 ```{r}
-set.seed(2)
 
-drug_split <- initial_split(census_summarized, prop = 0.75)
-drug_train <- training(drug_split)
-drug_test <- testing(drug_split)
 ```
 
 ```{r}
@@ -159,9 +151,37 @@ drug_test <- testing(drug_split)
 
 drug_fit <- linear_reg() |>
   set_engine("glm") |>
-  fit(Prescriptions_Per_Population ~ TotalWorkMale + TotalWorkFemale + TotalPovertyMale + TotalPovertyFemale + TotalInsuredMale + TotalUninsuredMale + TotalInsuredFemale + TotalUninsuredFemale + TotalAgeMale + TotalAgeFemale, data = census_summarized, family = "binomial")
+  fit(Prescriptions_Per_Population ~ EmployedPercent + PovertyPercent + InsuredPercent, data = census_summarized, family = "binomial")
 
-tidy(drug_fit) |> kable(digits = 7)
+tidy(drug_fit)
+glance(drug_fit)
+```
+
+```{r}
+set.seed(1234)
+n = 100
+
+observed_fit <- census_summarized |>
+  specify(Prescriptions_Per_Population ~ EmployedPercent + PovertyPercent + InsuredPercent) |>
+  fit()
+
+null_dist <- census_summarized |>
+  specify(Prescriptions_Per_Population ~ EmployedPercent + PovertyPercent + InsuredPercent) |>
+  hypothesize(null = "independence") |>
+  generate(reps = n, type = "permute") |>
+  fit()
+
+null_dist |>
+  filter(term == "EmployedPercent") |>
+  ggplot(aes(x=estimate)) +
+  geom_histogram() +
+  geom_vline(xintercept = 1.96)
+
+get_p_value(
+  null_dist,
+  obs_stat = observed_fit,
+  direction = "two-sided"
+)
 ```
 
 ```{r}
